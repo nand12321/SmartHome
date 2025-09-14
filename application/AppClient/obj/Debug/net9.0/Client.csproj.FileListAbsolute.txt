@@ -1,0 +1,12 @@
+/home/icee/Dev/SmartHome/application/Client/obj/Debug/net9.0/Client.csproj.AssemblyReference.cache
+/home/icee/Dev/SmartHome/application/Client/obj/Debug/net9.0/Client.GeneratedMSBuildEditorConfig.editorconfig
+/home/icee/Dev/SmartHome/application/Client/obj/Debug/net9.0/Client.AssemblyInfoInputs.cache
+/home/icee/Dev/SmartHome/application/Client/obj/Debug/net9.0/Client.AssemblyInfo.cs
+/home/icee/Dev/SmartHome/application/Client/obj/Debug/net9.0/Client.csproj.CoreCompileInputs.cache
+/home/icee/Dev/SmartHome/application/Client/obj/Debug/net9.0/Client.sourcelink.json
+/home/icee/Dev/SmartHome/application/AppClient/obj/Debug/net9.0/Client.csproj.AssemblyReference.cache
+/home/icee/Dev/SmartHome/application/AppClient/obj/Debug/net9.0/Client.GeneratedMSBuildEditorConfig.editorconfig
+/home/icee/Dev/SmartHome/application/AppClient/obj/Debug/net9.0/Client.AssemblyInfoInputs.cache
+/home/icee/Dev/SmartHome/application/AppClient/obj/Debug/net9.0/Client.AssemblyInfo.cs
+/home/icee/Dev/SmartHome/application/AppClient/obj/Debug/net9.0/Client.csproj.CoreCompileInputs.cache
+/home/icee/Dev/SmartHome/application/AppClient/obj/Debug/net9.0/Client.sourcelink.json

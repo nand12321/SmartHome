@@ -6,6 +6,6 @@
 
 extern DHT dht;
 
-void dht_setup();
-
-void dht_update();
+void dhtSetup();
+float getTemperature();
+float getHumidity();

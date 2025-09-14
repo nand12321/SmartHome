@@ -2,26 +2,20 @@
 
 DHT dht(DHTPIN, DHTTYPE);
 
-void dht_setup() {
-    Serial.begin(9600);
+void dhtSetup() {
     dht.begin();
-    delay(2000);
-    Serial.begin(9600);
 }
 
-void dht_update() {
+float getTemperature() {
     float t = dht.readTemperature();
-    float h = dht.readHumidity();
-
     if (isnan(t)) {
-        Serial.println("something went wrong");
+        Serial.println("can't read temperature");
     }
-    Serial.print("T: ");
-    Serial.print(t);
-    Serial.print(" C");
-    Serial.print(" H: ");
-    Serial.print(h);
-    Serial.println(" %");
+}
 
-    delay(2000);
+float getHumidity() {
+    float h = dht.readHumidity();
+    if (isnan(h)) {
+        Serial.println("can't read humidty");
+    }
 }

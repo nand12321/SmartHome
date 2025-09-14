@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "dgSpecHash": "ATNPg+EBMqw=",
+  "success": true,
+  "projectFilePath": "/home/icee/Dev/SmartHome/application/Server/Server.csproj",
+  "expectedPackageFiles": [
+    "/home/icee/.nuget/packages/mqttnet/4.0.0.167/mqttnet.4.0.0.167.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Server depends on MQTTnet (>= 3.1.5) but MQTTnet 3.1.5 was not found. MQTTnet 4.0.0.167 was resolved instead.",
+      "libraryId": "MQTTnet",
+      "targetGraphs": [
+        "net9.0"
+      ]
+    }
+  ]
+}
