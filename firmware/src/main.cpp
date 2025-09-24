@@ -1,17 +1,13 @@
-#include <WiFi.h>
-#include <PubSubClient.h>
+#include <Arduino.h>
 #include "dht.h"
+#include <WiFi.h>
+// #include "Servo.h"
+
+
+Servo doorServo;
 
 const char* ssid = "CoolWiFi";
 const char* password = "123456789";
-
-const char* mqtt_server = "10.125.43.102";
-WiFiClient espClient;
-PubSubClient client(espClient);
-
-long lastMsg = 0;
-char mag[50];
-int value = 0;
 
 struct Controller {
   int pin;
@@ -22,24 +18,51 @@ Controller mainLightController{21, false};
 Controller roofLightController{22, false};
 Controller doorController{19, false};
 
-void setupWIFI();
-void callback(char* topic, byte* message, unsigned int length);
-void reconnect();
+WiFiServer wifiServer(80);
+
+void setupWIFI(const char* ssid, const char* password);
+void serverLoop();
+char* readStringUntil(char c, char str[], int n);
 
 void setup() {
   Serial.begin(9600);
-  dhtSetup();
-  setupWIFI();
 
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
+  doorServo.attach(doorController.pin);
+  dhtSetup();
+  setupWIFI(ssid, password);
 
   pinMode(mainLightController.pin, OUTPUT);
   pinMode(roofLightController.pin, OUTPUT);
   pinMode(doorController.pin, OUTPUT);
 }
 
-void setupWIFI() {
+void loop() {
+  // float temperature = getTemperature();
+  // float humidity = getHumidity();
+
+  if (mainLightController.status = true) {
+    digitalWrite(mainLightController.pin, HIGH);
+  }
+  else {
+    digitalWrite(mainLightController.pin, LOW);
+  }
+  if (roofLightController.status = true) {
+    digitalWrite(roofLightController.pin, HIGH);
+  }
+  else {
+    digitalWrite(roofLightController.pin, LOW);
+  }
+  if (doorController.status = true) {
+    doorServo.write(90);
+  }
+  else {
+    doorServo.write(0);
+  }
+
+  serverLoop();
+}
+
+void setupWIFI(const char* ssid, const char* password) {
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -47,87 +70,47 @@ void setupWIFI() {
   }
   Serial.println("\nConnected to WiFi");
   Serial.println(WiFi.localIP());
+
+  wifiServer.begin();
 }
 
-void reconnect() {
-  while (!client.connected()) {
-    Serial.print("Attempting MQTT connection...");
-    if (client.connect("ESP8266Client")) {
-      Serial.println("connected");
-      client.subscribe("smarthome/mainlight");
-      client.subscribe("smarthome/rooflight");
-      client.subscribe("smarthome/door");
-    } else {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
-      delay(5000);
+void serverLoop() {
+    WiFiClient client = wifiServer.available();
+    if (client) {
+      Serial.println("Client connected!");
+      while (client.connected()) {
+
+        if (client.available()) {
+          String req = client.readStringUntil('\n');
+          req.trim(); // remove \r\n
+
+          int sep = req.indexOf(':');
+          String command = req.substring(0, sep);
+          String value   = req.substring(sep + 1);
+
+          Serial.print("Command: ");
+          Serial.println(command);
+          Serial.print("Value: ");
+          Serial.println(value);
+
+          if (command == "MAIN_LIGHT") {
+              mainLightController.status = (value == "ON") ? true : false;
+          }
+          else if (command == "ROOF_LIGHT") {
+              roofLightController.status = (value == "ON") ? true : false;
+          }
+          else if (command == "DOOR") {
+              doorController.status = (value == "ON") ? true : false;
+          }
+
+          client.println("ESP32 says: " + req);
+        }
+
+      // Serial.print("Received: ");
+      // Serial.println(req);
+
+      // client.println("ESP32 says: " + req);
     }
   }
 }
-void loop() {
-  if (!client.connected()) {
-    reconnect();
-  }
-  client.loop();
 
-  long now = millis();
-  if (now - lastMsg > 5000) {
-    lastMsg = now;
-    
-    // Temperature in Celsius
-    float temperature = getTemperature();
-    char tempString[8];
-    dtostrf(temperature, 1, 2, tempString);
-    Serial.print("Temperature: ");
-    Serial.println(tempString);
-    client.publish("smarthome/temperature", tempString);
-
-    // Convert the value to a char array
-    float humidity = getHumidity();
-    char humString[8];
-    dtostrf(humidity, 1, 2, humString);
-    Serial.print("Humidity: ");
-    Serial.println(humString);
-    client.publish("smarthome/humidity", humString);
-  }
-}
-
-void callback(char* topic, byte* message, unsigned int length) {
-  Serial.print("Message arrived on topic: ");
-  Serial.print(topic);
-  Serial.print(". Message: ");
-  String messageTemp;
-  
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)message[i]);
-    messageTemp += (char)message[i];
-  }
-  Serial.println();
-
-  if (topic == "smarthome/mainlight") {
-    Serial.println("Main light control");
-    if(messageTemp == "ON"){
-      mainLightController.status = true;
-    } else if(messageTemp == "OFF"){
-      mainLightController.status = false;
-    }
-    digitalWrite(mainLightController.pin, mainLightController.status);
-  }
-  else if (String(topic) == "smarthome/rooflight") {
-    if(messageTemp == "ON"){
-      roofLightController.status = true;
-    } else if(messageTemp == "OFF"){
-      roofLightController.status = false;
-    }
-    digitalWrite(roofLightController.pin, roofLightController.status);
-  }
-  else if (String(topic) == "smarthome/door") {
-    if(messageTemp == "OPEN"){
-      doorController.status = true;
-    } else if(messageTemp == "CLOSE"){
-      doorController.status = false;
-    }
-    digitalWrite(doorController.pin, doorController.status);
-  }
-}
