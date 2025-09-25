@@ -17,7 +17,7 @@ namespace Application
         {
             try
             {
-                IPAddress ipAddr = IPAddress.Parse("10.125.43.159");
+                IPAddress ipAddr = IPAddress.Parse("10.64.143.159");
                 IPEndPoint esp32EndPoint = new IPEndPoint(ipAddr, 80);
 
                 using Socket sender = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);

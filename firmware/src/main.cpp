@@ -1,116 +1,85 @@
 #include <Arduino.h>
-#include "dht.h"
 #include <WiFi.h>
-// #include "Servo.h"
-
+#include <ESP32Servo.h>
+#include "dht.h"
 
 Servo doorServo;
 
 const char* ssid = "CoolWiFi";
 const char* password = "123456789";
 
-struct Controller {
-  int pin;
-  bool status;
-};
+const int MAIN_LIGHT_PIN = 21;
+const int ROOF_LIGHT_PIN = 22;
+const int DOOR_PIN       = 19;
 
-Controller mainLightController{21, false};
-Controller roofLightController{22, false};
-Controller doorController{19, false};
+bool mainLightStatus = false;
+bool roofLightStatus = false;
+bool doorStatus = false;
 
 WiFiServer wifiServer(80);
 
-void setupWIFI(const char* ssid, const char* password);
-void serverLoop();
-char* readStringUntil(char c, char str[], int n);
+void setupWIFI() {
+    WiFi.begin(ssid, password);
+    Serial.print("Connecting to WiFi");
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("\nConnected!");
+    Serial.println("ESP32 IP: " + WiFi.localIP().toString());
+    wifiServer.begin();
+}
 
 void setup() {
-  Serial.begin(9600);
+    Serial.begin(9600);
 
-  doorServo.attach(doorController.pin);
-  dhtSetup();
-  setupWIFI(ssid, password);
+    doorServo.attach(DOOR_PIN);
+    dhtSetup();
 
-  pinMode(mainLightController.pin, OUTPUT);
-  pinMode(roofLightController.pin, OUTPUT);
-  pinMode(doorController.pin, OUTPUT);
+    pinMode(MAIN_LIGHT_PIN, OUTPUT);
+    pinMode(ROOF_LIGHT_PIN, OUTPUT);
+    pinMode(DOOR_PIN, OUTPUT);
+
+    setupWIFI();
 }
 
 void loop() {
-  // float temperature = getTemperature();
-  // float humidity = getHumidity();
-
-  if (mainLightController.status = true) {
-    digitalWrite(mainLightController.pin, HIGH);
-  }
-  else {
-    digitalWrite(mainLightController.pin, LOW);
-  }
-  if (roofLightController.status = true) {
-    digitalWrite(roofLightController.pin, HIGH);
-  }
-  else {
-    digitalWrite(roofLightController.pin, LOW);
-  }
-  if (doorController.status = true) {
-    doorServo.write(90);
-  }
-  else {
-    doorServo.write(0);
-  }
-
-  serverLoop();
-}
-
-void setupWIFI(const char* ssid, const char* password) {
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("\nConnected to WiFi");
-  Serial.println(WiFi.localIP());
-
-  wifiServer.begin();
-}
-
-void serverLoop() {
     WiFiClient client = wifiServer.available();
     if (client) {
-      Serial.println("Client connected!");
-      while (client.connected()) {
+        Serial.println("Client connected!");
+        while (client.connected()) {
+            if (client.available()) {
+                String req = client.readStringUntil('\n');
+                req.trim();
 
-        if (client.available()) {
-          String req = client.readStringUntil('\n');
-          req.trim(); // remove \r\n
+                int sep = req.indexOf(':');
+                if (sep == -1) continue;
 
-          int sep = req.indexOf(':');
-          String command = req.substring(0, sep);
-          String value   = req.substring(sep + 1);
+                String command = req.substring(0, sep);
+                String value   = req.substring(sep + 1);
 
-          Serial.print("Command: ");
-          Serial.println(command);
-          Serial.print("Value: ");
-          Serial.println(value);
+                Serial.print("Command: ");
+                Serial.println(command);
+                Serial.print("Value: ");
+                Serial.println(value);
 
-          if (command == "MAIN_LIGHT") {
-              mainLightController.status = (value == "ON") ? true : false;
-          }
-          else if (command == "ROOF_LIGHT") {
-              roofLightController.status = (value == "ON") ? true : false;
-          }
-          else if (command == "DOOR") {
-              doorController.status = (value == "ON") ? true : false;
-          }
+                if (command == "MAIN_LIGHT") {
+                    mainLightStatus = (value == "ON");
+                    digitalWrite(MAIN_LIGHT_PIN, mainLightStatus ? HIGH : LOW);
+                }
+                else if (command == "ROOF_LIGHT") {
+                    roofLightStatus = (value == "ON");
+                    digitalWrite(ROOF_LIGHT_PIN, roofLightStatus ? HIGH : LOW);
+                }
+                else if (command == "DOOR") {
+                    doorStatus = (value == "ON");
+                    doorServo.write(doorStatus ? 90 : 0);
+                }
 
-          client.println("ESP32 says: " + req);
+                client.println("ESP32 says: " + req);
+            }
         }
-
-      // Serial.print("Received: ");
-      // Serial.println(req);
-
-      // client.println("ESP32 says: " + req);
+        client.stop();
+        Serial.println("Client disconnected.");
     }
-  }
 }
-
