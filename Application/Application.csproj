@@ -8,8 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="11.3.6" />
-    <PackageReference Include="MQTTnet" Version="4.*" />
+    <PackageReference Include="Raylib-cs" Version="7.0.1" />
   </ItemGroup>
 
 </Project>

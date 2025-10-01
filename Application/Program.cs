@@ -1,4 +1,5 @@
 ﻿using System;
+using Raylib_cs;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -6,18 +7,26 @@ using System.Threading.Tasks;
 
 namespace Application
 {
-    class Client
+    class Program
     {
-        static async Task Main(string[] args)
+        static String serverIP = "10.202.154.159";
+
+        static void Main(string[] args)
         {
-            await ExecuteClient();
+            Console.WriteLine("Starting Client...");
+
+            UI ui = new UI();
+
+            _ = Task.Run(() => ExecuteClient(ui));
+
+            ui.Run();
         }
 
-        static async Task ExecuteClient()
+        public static async Task ExecuteClient(UI ui)
         {
             try
             {
-                IPAddress ipAddr = IPAddress.Parse("10.64.143.159");
+                IPAddress ipAddr = IPAddress.Parse(serverIP);
                 IPEndPoint esp32EndPoint = new IPEndPoint(ipAddr, 80);
 
                 using Socket sender = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -36,6 +45,16 @@ namespace Application
                             if (byteRecv == 0) break;
                             string msg = Encoding.ASCII.GetString(buffer, 0, byteRecv);
                             Console.WriteLine($"[Server] {msg}");
+
+                            if (msg.Contains(','))
+                            {
+                                var parts = msg.Split(',');
+                                if (parts.Length >= 2)
+                                {
+                                    ui.temprature = parts[0];
+                                    ui.humidity = parts[1];
+                                }
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -46,14 +65,38 @@ namespace Application
                 });
 
 
+                bool lastMainClick = false;
+                bool lastRoofClick = false;
+                bool lastDoorClick = false;
+
                 while (true)
                 {
-                    string input = Console.ReadLine();
-                    if (string.IsNullOrWhiteSpace(input)) continue;
-                    if (input.ToLower() == "exit") break;
+                    string input = "";
 
-                    byte[] messageSent = Encoding.ASCII.GetBytes(input);
-                    await sender.SendAsync(messageSent, SocketFlags.None);
+                    if (ui.mainLightButton.IsClicked() && !lastMainClick)
+                    {
+                        input = "MAIN_LIGHT";
+                    }
+                    if (ui.roofLightButton.IsClicked() && !lastRoofClick)
+                    {
+                        input = "ROOF_LIGHT";
+                    }
+                    if (ui.doorButton.IsClicked() && !lastDoorClick)
+                    {
+                        input = "DOOR";
+                    }
+
+                    lastMainClick = ui.mainLightButton.IsClicked();
+                    lastRoofClick = ui.roofLightButton.IsClicked();
+                    lastDoorClick = ui.doorButton.IsClicked();
+
+                    if (!string.IsNullOrWhiteSpace(input))
+                    {
+                        byte[] messageSent = Encoding.ASCII.GetBytes(input + "\n");
+                        await sender.SendAsync(messageSent, SocketFlags.None);
+                    }
+
+                    await Task.Delay(10);
                 }
 
                 sender.Shutdown(SocketShutdown.Both);

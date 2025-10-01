@@ -1,14 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "jjuZntihbso=",
+  "dgSpecHash": "nLtn75qk38Q=",
   "success": true,
   "projectFilePath": "/home/icee/Dev/SmartHome/Application/Application.csproj",
   "expectedPackageFiles": [
-    "/home/icee/.nuget/packages/avalonia/11.3.6/avalonia.11.3.6.nupkg.sha512",
-    "/home/icee/.nuget/packages/avalonia.buildservices/0.0.31/avalonia.buildservices.0.0.31.nupkg.sha512",
-    "/home/icee/.nuget/packages/avalonia.remote.protocol/11.3.6/avalonia.remote.protocol.11.3.6.nupkg.sha512",
-    "/home/icee/.nuget/packages/microcom.runtime/0.11.0/microcom.runtime.0.11.0.nupkg.sha512",
-    "/home/icee/.nuget/packages/mqttnet/4.3.7.1207/mqttnet.4.3.7.1207.nupkg.sha512"
+    "/home/icee/.nuget/packages/raylib-cs/7.0.1/raylib-cs.7.0.1.nupkg.sha512"
   ],
   "logs": []
 }
