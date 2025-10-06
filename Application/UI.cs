@@ -13,29 +13,74 @@ namespace Application
         public String temprature { get; set; } = "";
         public String humidity { get; set; } = "";
 
+        public String hoveredAnimationState = "";
+        Dictionary<string, Texture2D> animationStates = new Dictionary<string, Texture2D>();
+
         public UI()
         {
             Raylib.InitWindow(800, 600, "Smart Home Control");
             Raylib.SetTargetFPS(60);
 
-            mainLightButton = new Button(100, 300, 200, 50, "Main");
-            roofLightButton = new Button(200, 300, 200, 50, "Roof");
-            doorButton = new Button(300, 300, 200, 50, "Door");
+            mainLightButton = new Button(560, 365, 50, 50);
+            roofLightButton = new Button(560, 230, 50, 50);
+            doorButton = new Button(410, 390, 50, 100);
+
+            animationStates["default"] = Raylib.LoadTexture("resources/home_default.png");
+            animationStates["mainLight"] = Raylib.LoadTexture("resources/home_main_light.png");
+            animationStates["roofLight"] = Raylib.LoadTexture("resources/home_roof_light.png");
+            animationStates["door"] = Raylib.LoadTexture("resources/home_door.png");
         }
 
         public void Run()
         {
             while (!Raylib.WindowShouldClose())
             {
+                // Update
+                if (mainLightButton.IsHovered())
+                {
+                    hoveredAnimationState = "mainLight";
+                }
+                else if (roofLightButton.IsHovered())
+                {
+                    hoveredAnimationState = "roofLight";
+                }
+                else if (doorButton.IsHovered())
+                {
+                    hoveredAnimationState = "door";
+                }
+                else
+                {
+                    hoveredAnimationState = "default";
+                }
+
+                // Draw
                 Raylib.BeginDrawing();
                 Raylib.ClearBackground(Color.White);
 
-                mainLightButton.Draw();
-                roofLightButton.Draw();
-                doorButton.Draw();
+                // Drawing the home
+                switch (hoveredAnimationState)
+                {
+                    case "mainLight":
+                        Raylib.DrawTexture(animationStates["mainLight"], 0, 0, Color.White); 
+                        break;
+                    case "roofLight":
+                        Raylib.DrawTexture(animationStates["roofLight"], 0, 0, Color.White); 
+                        break;
+                    case "door":
+                        Raylib.DrawTexture(animationStates["door"], 0, 0, Color.White); 
+                        break;
+                    default:
+                        Raylib.DrawTexture(animationStates["default"], 0, 0, Color.White);                      
+                        break;
+                }
+
+                // mainLightButton.Draw();
+                // roofLightButton.Draw();
+                // doorButton.Draw();
                 
-                Raylib.DrawText(temprature, 50, 50, 20, Color.Black);
-                Raylib.DrawText(humidity, 50, 80, 20, Color.Black);
+                // Drawing sensor data
+                Raylib.DrawText(temprature, 100, 330, 20, Color.Gray);
+                Raylib.DrawText(humidity, 100, 425, 20, Color.Gray);
 
                 Raylib.EndDrawing();
             }
@@ -45,15 +90,11 @@ namespace Application
     public class Button
     {
         public Rectangle Rect;
-        public string Text;
         public Color BgColor = Color.Gray;
-        public Color TextColor = Color.Black;
-        public int FontSize = 20;
 
-        public Button(float x, float y, float width, float height, string text)
+        public Button(float x, float y, float width, float height)
         {
             Rect = new Rectangle(x, y, width, height);
-            Text = text;
         }
 
         public bool IsClicked()
@@ -66,17 +107,15 @@ namespace Application
             return false;
         }
 
+        public bool IsHovered()
+        {
+            var mousePos = Raylib.GetMousePosition();
+            return Raylib.CheckCollisionPointRec(mousePos, Rect);
+        }
+
         public void Draw()
         {
             Raylib.DrawRectangleRec(Rect, BgColor);
-            int textWidth = Raylib.MeasureText(Text, FontSize);
-            Raylib.DrawText(
-                Text,
-                (int)(Rect.X + (Rect.Width - textWidth) / 2),
-                (int)(Rect.Y + (Rect.Height - FontSize) / 2),
-                FontSize,
-                TextColor
-            );
         }
     }
 }

@@ -37,25 +37,35 @@ namespace Application
                 _ = Task.Run(async () =>
                 {
                     var buffer = new byte[1024];
+                    string leftover = "";
+
                     while (true)
                     {
                         try
                         {
                             int byteRecv = await sender.ReceiveAsync(buffer, SocketFlags.None);
                             if (byteRecv == 0) break;
-                            string msg = Encoding.UTF8.GetString(buffer, 0, byteRecv);
 
-                            Console.WriteLine($"[Server] {msg}");
+                            string chunk = Encoding.UTF8.GetString(buffer, 0, byteRecv);
+                            leftover += chunk;
 
-                            if (msg.Contains(','))
+                            string[] messages = leftover.Split('\n');
+
+                            for (int i = 0; i < messages.Length - 1; i++)
                             {
-                                var parts = msg.Split(',');
-                                if (parts.Length >= 2)
+                                string msg = messages[i].Trim('\r', '\n', '\0', ' ');
+                                if (msg.Contains(','))
                                 {
-                                    ui.temprature = parts[0];
-                                    ui.humidity = parts[1];
+                                    var parts = msg.Split(',');
+                                    if (parts.Length >= 2)
+                                    {
+                                        ui.temprature = parts[0];
+                                        ui.humidity = parts[1];
+                                    }
                                 }
                             }
+
+                            leftover = messages[^1];
                         }
                         catch (Exception ex)
                         {
@@ -64,7 +74,6 @@ namespace Application
                         }
                     }
                 });
-
 
                 bool lastMainClick = false;
                 bool lastRoofClick = false;

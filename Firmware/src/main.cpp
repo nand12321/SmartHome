@@ -80,7 +80,7 @@ void loop()
                     // Serial.println(doorStatus ? "OPEN" : "CLOSE");
                 }
             }
-            client.print(String(getTemperature()) + "," + String(getHumidity()));
+            client.print(String(getTemperature()) + "," + String(getHumidity()) + "\n");
         }
         client.stop();
         Serial.println("Client disconnected.");
