@@ -9,7 +9,7 @@ namespace Application
 {
     class Program
     {
-        static String serverIP = "10.202.154.159";
+        static String serverIP = "10.162.199.159";
 
         static void Main(string[] args)
         {
@@ -43,7 +43,8 @@ namespace Application
                         {
                             int byteRecv = await sender.ReceiveAsync(buffer, SocketFlags.None);
                             if (byteRecv == 0) break;
-                            string msg = Encoding.ASCII.GetString(buffer, 0, byteRecv);
+                            string msg = Encoding.UTF8.GetString(buffer, 0, byteRecv);
+
                             Console.WriteLine($"[Server] {msg}");
 
                             if (msg.Contains(','))

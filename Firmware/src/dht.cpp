@@ -11,6 +11,7 @@ float getTemperature() {
     if (isnan(t)) {
         Serial.println("can't read temperature");
     }
+    return t;
 }
 
 float getHumidity() {
@@ -18,4 +19,5 @@ float getHumidity() {
     if (isnan(h)) {
         Serial.println("can't read humidty");
     }
+    return h;
 }

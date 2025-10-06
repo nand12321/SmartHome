@@ -2,8 +2,8 @@
 #include <WiFi.h>
 #include "dht.h"
 
-const char* ssid = "Wi-Fi SSID";
-const char* password = "password";
+const char* ssid = "CoolWiFi";
+const char* password = "123456789";
 
 const int MAIN_LIGHT_PIN = 21;
 const int ROOF_LIGHT_PIN = 22;
@@ -34,6 +34,8 @@ void setup()
 
     // Communicating with the arduino to control the door's servo 
     Serial2.begin(9600, SERIAL_8N1, 16, 17);
+
+    dhtSetup();
 
     pinMode(MAIN_LIGHT_PIN, OUTPUT);
     pinMode(ROOF_LIGHT_PIN, OUTPUT);
@@ -78,8 +80,7 @@ void loop()
                     // Serial.println(doorStatus ? "OPEN" : "CLOSE");
                 }
             }
-            // client.println("temprature: " + String(getTemperature()) + " humidity: " + String(getHumidity()));
-            // client.println("34,50");
+            client.print(String(getTemperature()) + "," + String(getHumidity()));
         }
         client.stop();
         Serial.println("Client disconnected.");

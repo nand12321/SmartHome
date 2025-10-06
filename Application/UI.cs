@@ -18,9 +18,9 @@ namespace Application
             Raylib.InitWindow(800, 600, "Smart Home Control");
             Raylib.SetTargetFPS(60);
 
-            mainLightButton = new Button(100, 300, 200, 50, "Click Me");
-            roofLightButton = new Button(200, 300, 200, 50, "Click Me");
-            doorButton = new Button(300, 300, 200, 50, "Click Me");
+            mainLightButton = new Button(100, 300, 200, 50, "Main");
+            roofLightButton = new Button(200, 300, 200, 50, "Roof");
+            doorButton = new Button(300, 300, 200, 50, "Door");
         }
 
         public void Run()
@@ -33,16 +33,15 @@ namespace Application
                 mainLightButton.Draw();
                 roofLightButton.Draw();
                 doorButton.Draw();
-
-                Raylib.DrawText($"Temperature: {temprature}", 50, 50, 20, Color.Black);
-                Raylib.DrawText($"Humidity: {humidity}", 50, 80, 20, Color.Black);
+                
+                Raylib.DrawText(temprature, 50, 50, 20, Color.Black);
+                Raylib.DrawText(humidity, 50, 80, 20, Color.Black);
 
                 Raylib.EndDrawing();
             }
             Raylib.CloseWindow();
         }
     }
-
     public class Button
     {
         public Rectangle Rect;
